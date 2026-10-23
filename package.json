@@ -6,23 +6,45 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:check": "drizzle-kit check",
+    "auth:generate": "pnpm dlx auth@1.7.12 generate --config src/lib/auth.ts --output src/lib/auth-schema.ts -y",
+    "contracts:json": "tsx scripts/contracts-json.ts",
+    "sync:token": "tsx scripts/make-sync-token.ts",
+    "build:vercel": "bash scripts/vercel-build.sh"
   },
   "dependencies": {
-    "next": "16.0.8",
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "@neondatabase/serverless": "1.2.0",
+    "better-auth": "1.7.12",
+    "drizzle-orm": "0.45.4",
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-email": "6.11.3",
+    "resend": "6.34.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.22",
+    "drizzle-kit": "0.31.11",
     "eslint": "^9",
-    "eslint-config-next": "16.0.8",
+    "eslint-config-next": "16.4.2",
     "postcss": "^8.5.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+    "tsx": "4.23.15",
+    "typescript": "^5",
+    "vitest": "5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@10.28.0"
 }

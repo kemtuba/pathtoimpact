@@ -1,0 +1,888 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Response of GET /api/sync/v1/events. Apply events idempotently, keyed by id.",
+  "properties": {
+    "events": {
+      "items": {
+        "oneOf": [
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "overlay.approved",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "sha256": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "version": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "sha256",
+                  "user_id",
+                  "version"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "resume.uploaded",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "replaces_sha256": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resume_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "replaces_sha256",
+                  "resume_id",
+                  "sha256",
+                  "user_id"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "decision.recorded",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "at": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                    "type": "string"
+                  },
+                  "decision": {
+                    "enum": [
+                      "apply",
+                      "stretch",
+                      "pass"
+                    ],
+                    "type": "string"
+                  },
+                  "decision_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "disputed": {
+                    "type": "boolean"
+                  },
+                  "external_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "posting_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "reason_code": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "too_senior",
+                          "too_junior",
+                          "wrong_field",
+                          "location",
+                          "pay",
+                          "not_interesting",
+                          "outshone",
+                          "duplicate",
+                          "posting_gone",
+                          "other",
+                          "verdict_wrong"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "week_key": {
+                    "pattern": "^\\d{4}-W\\d{2}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "at",
+                  "decision",
+                  "decision_id",
+                  "disputed",
+                  "external_id",
+                  "posting_id",
+                  "reason_code",
+                  "text",
+                  "week_key"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "build.requested",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "build_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "external_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "needs_draft_review": {
+                    "type": "boolean"
+                  },
+                  "posting_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "requested_at": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "build_id",
+                  "external_id",
+                  "needs_draft_review",
+                  "posting_id",
+                  "requested_at"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "build.draft_approved",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "approved_draft": {
+                    "properties": {
+                      "cover_letter_md": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "keywords": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "tailored_md": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "cover_letter_md",
+                      "keywords",
+                      "tailored_md"
+                    ],
+                    "type": "object"
+                  },
+                  "build_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "approved_draft",
+                  "build_id"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "build.cancelled",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "build_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "build_id"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "application.confirmed",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "application_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "applied_on": {
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                    "type": "string"
+                  },
+                  "applied_tz": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "build_id": {
+                    "anyOf": [
+                      {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "confirmed_sha256": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "external_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "master_sha256": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "posting_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "referral_name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "tier": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "via": {
+                    "enum": [
+                      "portal",
+                      "email",
+                      "referral"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "application_id",
+                  "applied_on",
+                  "applied_tz",
+                  "build_id",
+                  "confirmed_sha256",
+                  "external_id",
+                  "master_sha256",
+                  "posting_id",
+                  "referral_name",
+                  "tier",
+                  "via"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "reply.recorded",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "application_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "external_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "kind": {
+                    "enum": [
+                      "screen",
+                      "interview",
+                      "offer",
+                      "rejected",
+                      "no_response",
+                      "withdrawn"
+                    ],
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "on": {
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                    "type": "string"
+                  },
+                  "reply_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "application_id",
+                  "external_id",
+                  "kind",
+                  "note",
+                  "on",
+                  "reply_id"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "master.approved",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "master_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "profile_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "version": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "master_id",
+                  "profile_id",
+                  "sha256",
+                  "user_id",
+                  "version"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "survey.answered",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "answer": {
+                    "type": "string"
+                  },
+                  "question_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "survey_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "week_key": {
+                    "pattern": "^\\d{4}-W\\d{2}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "answer",
+                  "question_id",
+                  "survey_id",
+                  "user_id",
+                  "week_key"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "participant.paused",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "user_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "user_id"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "participant.resumed",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "user_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "user_id"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^[1-9]\\d*$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "deletion.requested",
+                "type": "string"
+              },
+              "payload": {
+                "properties": {
+                  "reason": {
+                    "enum": [
+                      "user",
+                      "retention",
+                      "consent_revoked"
+                    ],
+                    "type": "string"
+                  },
+                  "requested_at": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "vault_slug": {
+                    "anyOf": [
+                      {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "reason",
+                  "requested_at",
+                  "user_id",
+                  "vault_slug"
+                ],
+                "type": "object"
+              },
+              "user_id": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "at",
+              "id",
+              "kind",
+              "payload",
+              "user_id"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "maxItems": 500,
+      "type": "array"
+    },
+    "has_more": {
+      "type": "boolean"
+    },
+    "next_after": {
+      "pattern": "^(0|[1-9]\\d*)$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "events",
+    "has_more",
+    "next_after"
+  ],
+  "title": "Sync event stream",
+  "type": "object",
+  "x-contract-version": "1.0.0"
+}

@@ -1,0 +1,436 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An approved overlay version, grouped by form. Fields marked x-report-only are never scored.",
+  "properties": {
+    "form_1": {
+      "anyOf": [
+        {
+          "required": [
+            "primary_profile_id"
+          ]
+        },
+        {
+          "properties": {
+            "not_sure": {
+              "const": true
+            }
+          },
+          "required": [
+            "not_sure"
+          ]
+        }
+      ],
+      "properties": {
+        "not_sure": {
+          "type": "boolean"
+        },
+        "primary_profile_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "secondary_profile_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "form_2": {
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "required": [
+                "metro"
+              ]
+            },
+            {
+              "properties": {
+                "remote_ok": {
+                  "const": true
+                }
+              },
+              "required": [
+                "remote_ok"
+              ]
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "required": [
+                "pay_floor_annual"
+              ]
+            },
+            {
+              "required": [
+                "pay_floor_hourly"
+              ]
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "clearance": {
+          "description": "Report only: the engine stores and shows it and never scores on it.",
+          "minLength": 1,
+          "type": "string",
+          "x-report-only": true
+        },
+        "country": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "email": {
+          "format": "email",
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+          "type": "string"
+        },
+        "linkedin_url": {
+          "format": "uri",
+          "pattern": "^https?:\\/\\/",
+          "type": "string"
+        },
+        "max_onsite_days": {
+          "maximum": 7,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_travel_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "metro": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "name_printed": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "other_limits": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "pay_floor_annual": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "pay_floor_hourly": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "phone": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "relocation": {
+          "type": "boolean"
+        },
+        "remote_ok": {
+          "type": "boolean"
+        },
+        "resume_filename": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "site_url": {
+          "format": "uri",
+          "pattern": "^https?:\\/\\/",
+          "type": "string"
+        },
+        "timezone": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "work_authorization": {
+          "description": "Report only: the engine stores and shows it and never scores on it.",
+          "minLength": 1,
+          "type": "string",
+          "x-report-only": true
+        }
+      },
+      "required": [
+        "email",
+        "name_printed",
+        "resume_filename",
+        "timezone"
+      ],
+      "type": "object"
+    },
+    "form_3": {
+      "properties": {
+        "bar_admission": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "certifications": {
+          "items": {
+            "enum": [
+              "CISA",
+              "CIA",
+              "CPA",
+              "AIGP",
+              "ISO 42001 LA",
+              "CIPP"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "highest_degree": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "manages_people": {
+          "type": "boolean"
+        },
+        "phd": {
+          "type": "boolean"
+        },
+        "roles": {
+          "items": {
+            "oneOf": [
+              {
+                "required": [
+                  "end_month"
+                ]
+              },
+              {
+                "properties": {
+                  "current": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "current"
+                ]
+              }
+            ],
+            "properties": {
+              "current": {
+                "type": "boolean"
+              },
+              "employer": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "employment_type": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "end_month": {
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+                "type": "string"
+              },
+              "kinds": {
+                "default": [],
+                "items": {
+                  "properties": {
+                    "evidence": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "kind_id": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "evidence",
+                    "kind_id"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "start_month": {
+                "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+                "type": "string"
+              },
+              "title": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "employer",
+              "kinds",
+              "start_month",
+              "title"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "rung": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "stretch_years": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tools": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "highest_degree",
+        "roles",
+        "rung"
+      ],
+      "type": "object"
+    },
+    "form_5": {
+      "properties": {
+        "already_applied": {
+          "items": {
+            "properties": {
+              "company": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "role": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "company"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "apps_per_week": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "heavy_portal_per_week": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "interest_ranking": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "interviews_in_progress": {
+          "items": {
+            "properties": {
+              "company": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "role": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "company"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "projects": {
+          "items": {
+            "properties": {
+              "name": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "note": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "pattern": "^https?:\\/\\/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "url"
+            ],
+            "type": "object"
+          },
+          "maxItems": 4,
+          "type": "array"
+        },
+        "screen_domains": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "target_employers": {
+          "items": {
+            "properties": {
+              "name": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "site": {
+                "format": "uri",
+                "pattern": "^https?:\\/\\/",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "maxItems": 50,
+          "type": "array"
+        }
+      },
+      "required": [
+        "apps_per_week",
+        "heavy_portal_per_week"
+      ],
+      "type": "object"
+    },
+    "operator": {
+      "properties": {
+        "follow_up_days": {
+          "default": 7,
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "follow_up_days"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "form_1",
+    "form_2",
+    "form_3",
+    "form_5",
+    "operator"
+  ],
+  "title": "Participant overlay",
+  "type": "object",
+  "x-contract-version": "1.0.0"
+}

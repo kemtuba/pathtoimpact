@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Decision reason codes. x-mapping names the fit facet or sourcing rule each one tunes.",
+  "enum": [
+    "too_senior",
+    "too_junior",
+    "wrong_field",
+    "location",
+    "pay",
+    "not_interesting",
+    "outshone",
+    "duplicate",
+    "posting_gone",
+    "other",
+    "verdict_wrong"
+  ],
+  "title": "Reason codes",
+  "type": "string",
+  "x-contract-version": "1.0.0",
+  "x-mapping": {
+    "duplicate": {
+      "description": "The same role was already shown.",
+      "kind": "none"
+    },
+    "location": {
+      "description": "The location does not work for the person.",
+      "kind": "overlay",
+      "overlay_fields": [
+        "form_2.metro",
+        "form_2.remote_ok",
+        "form_2.relocation",
+        "form_2.country"
+      ]
+    },
+    "not_interesting": {
+      "description": "In range, but the person does not want it.",
+      "kind": "none"
+    },
+    "other": {
+      "description": "Anything else; the decision text says what.",
+      "kind": "none"
+    },
+    "outshone": {
+      "description": "The field of applicants is likely to be stronger.",
+      "facet": "competitive",
+      "kind": "facet"
+    },
+    "pay": {
+      "description": "The pay is under the person's floor.",
+      "kind": "overlay",
+      "overlay_fields": [
+        "form_2.pay_floor_annual",
+        "form_2.pay_floor_hourly"
+      ]
+    },
+    "posting_gone": {
+      "description": "The posting is closed or its link is dead.",
+      "kind": "none"
+    },
+    "too_junior": {
+      "description": "The role is below the person's level.",
+      "kind": "ceiling_words",
+      "overlay_fields": [
+        "form_3.rung",
+        "form_3.manages_people",
+        "form_3.stretch_years"
+      ]
+    },
+    "too_senior": {
+      "description": "The role is above the person's level.",
+      "kind": "ceiling_words",
+      "overlay_fields": [
+        "form_3.rung",
+        "form_3.manages_people",
+        "form_3.stretch_years"
+      ]
+    },
+    "verdict_wrong": {
+      "description": "The person disputes the engine's fit verdict.",
+      "kind": "none"
+    },
+    "wrong_field": {
+      "description": "The role is outside the profile's field.",
+      "kind": "sourcing_rule",
+      "rules": [
+        "title_patterns",
+        "screens"
+      ]
+    }
+  }
+}
