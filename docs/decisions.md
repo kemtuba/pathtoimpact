@@ -12,15 +12,15 @@ Kem accepted the plan's recommendation on all eleven week-1 decisions.
 
 | # | Decision | Choice | What it sets in motion |
 |---|---|---|---|
-| 1 | The Capital Clarity page | Hidden for now. The root shows a holding page, and the page's last version stays at commit 683ae5a on main. No new home and no redirect yet | Done on the working branch in commit 2d83e2a, which reaches the live site when the branch merges into main. To restore: git checkout 683ae5a -- src/app/page.tsx src/components/TypeformWidget.tsx, then pnpm add @typeform/embed-react@4.7.0 |
-| 2 | Hosting | Vercel Hobby until the first invite, then Pro before week 6 | Draft 1 offered no recommendation. This one was added on 23 Oct when Kem accepted the week-1 recommendations, and it can change with no code change |
+| 1 | The Capital Clarity page | Hidden for now. The root shows a holding page, and the page's last version stays at commit 683ae5a on main. No new home and no redirect yet | Done in commit 2d83e2a, which reached main in merge commit ab7651f. The existing Vercel project deploys main to production. To restore: git checkout 683ae5a -- src/app/page.tsx src/components/TypeformWidget.tsx, then pnpm add @typeform/embed-react@4.7.0 |
+| 2 | Hosting | Vercel Hobby until the first invite, then Pro before week 6, for the team kems-projects-c9c438de that owns the existing project | Draft 1 offered no recommendation. This one was added on 23 Oct when Kem accepted the week-1 recommendations, and it can change with no code change |
 | 3 | Auth | Built fresh on better-auth 1.7.12, from the proof's wiring | WS1 as written |
 | 4 | Invites | Operator-created accounts, sign-up disabled, a 7-day hashed invite token | WS1 step 6 |
 | 6 | Resumes and built PDFs | bytea in Postgres, capped at 4,194,304 bytes, with a nullable storage_key | WS2, WS4 and WS5 |
 | 8 | Merge policy | Pull requests from day one. Kem merges changes to the schema or the sync contract; sessions merge the rest once CI is green | Branch protection on main. The commit-author check now covers session merges too |
 | 10 | Where profiles live | Files in the engine repository, mirrored to the portal by the profiles push | The profile table and the profiles endpoint |
 | 12 | Operator and user zero | One account with the operator role and a participant row, plus a second address for testing invites | Scope decision 6 is yes: Kem is user zero of V3 and V4 |
-| 14 | Preview data | One fixed staging Neon branch, seeded with fixtures, never forked from production | Neon and Vercel setup |
+| 14 | Preview data | One fixed staging Neon branch, seeded with fixtures, never forked from production | Neon setup, and a staging Git branch served at the existing Vercel project's alias |
 | 15 | Email verification | The invite link counts as verification | WS1 configuration |
 | 25 | Kem's time budget | Sessions merge non-schema pull requests, and V1 and V2 are drafted after M4. M4 moves only if engine phase 1 slips | The estimate falls to about 65 to 82 hours, inside the scope's 65 to 85. M4 invites V3 and V4 users only |
 
