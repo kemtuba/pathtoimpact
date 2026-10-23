@@ -41,7 +41,15 @@ export function tokenMatches(presented: string | null, hexHashes: string[]): boo
 export function checkSyncRequest(request: Request): NextResponse | null {
   const header = request.headers.get("authorization");
   const presented = header?.startsWith("Bearer ") ? header.slice("Bearer ".length).trim() : null;
-  if (!tokenMatches(presented, syncTokenHashes())) {
+  let hashes: string[];
+  try {
+    hashes = syncTokenHashes();
+  } catch (error) {
+    // Names the variable and the rule, never a value.
+    const detail = error instanceof Error ? error.message : "unknown problem";
+    return syncError(500, "state", `The portal's sync configuration is invalid. ${detail}`);
+  }
+  if (!tokenMatches(presented, hashes)) {
     return syncError(401, "unauthorized", "Missing or wrong sync token.");
   }
   const version = request.headers.get("x-sync-version");

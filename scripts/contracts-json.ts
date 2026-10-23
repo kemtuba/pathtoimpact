@@ -11,7 +11,7 @@ import {
   REASON_CODE_MAPPING,
   eventsResponse,
   overlay,
-  postingsRequest,
+  postingsRequestForEngine,
   profilesRequest,
   reasonCode,
 } from "../src/lib/contracts/index";
@@ -37,8 +37,9 @@ const contracts: Contract[] = [
   {
     file: "posting-export",
     title: "Postings push",
-    description: "Body of POST /api/sync/v1/postings. card_json may carry only the keys listed here.",
-    schema: postingsRequest,
+    description:
+      "Body of POST /api/sync/v1/postings, with each item held to the item schema. The portal checks items one at a time and rejects a failing item alone; only the envelope fails the whole request. card_json may carry only the keys listed here.",
+    schema: postingsRequestForEngine,
     io: "input",
   },
   {

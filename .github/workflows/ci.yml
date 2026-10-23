@@ -29,6 +29,12 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm db:check
+      - name: Scripts load under tsx
+        # tsc accepts syntax tsx refuses, such as top-level await in CommonJS output.
+        run: |
+          out="$(pnpm -s db:migrate 2>&1 || true)"
+          echo "$out" | grep -q "db:migrate needs DATABASE_URL" || { echo "$out"; exit 1; }
+          pnpm -s sync:token > /dev/null
       - name: Migrations are committed
         run: |
           pnpm db:generate
@@ -48,7 +54,7 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          # Dummy values: better-auth reads both on import, so the build needs them.
+          # Dummy values. better-auth reads both on import; without them the build exits 0 but logs errors.
           BETTER_AUTH_SECRET: ci-only-placeholder-not-a-real-secret-0123456789
           BETTER_AUTH_URL: http://localhost:3000
 

@@ -291,9 +291,9 @@ class ConfigTests(SyncTestCase):
 
 
 OVERLAY_JSON = {"primary_profile_id": "V3", "name_printed": "Test Persona", "email": "persona@example.invalid"}
-OVERLAY_SHA = hashlib.sha256(json.dumps(OVERLAY_JSON, sort_keys=True).encode("utf-8")).hexdigest()
+OVERLAY_SHA = hashlib.sha256(json.dumps(OVERLAY_JSON, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
 OVERLAY_B_JSON = {"primary_profile_id": "V4", "name_printed": "Second Persona"}
-OVERLAY_B_SHA = hashlib.sha256(json.dumps(OVERLAY_B_JSON, sort_keys=True).encode("utf-8")).hexdigest()
+OVERLAY_B_SHA = hashlib.sha256(json.dumps(OVERLAY_B_JSON, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
 RESUME_BYTES = b"%PDF-1.4\n% synthetic test resume\n%%EOF\n"
 RESUME_SHA = hashlib.sha256(RESUME_BYTES).hexdigest()
 
@@ -489,6 +489,20 @@ class PullTests(SyncTestCase):
         self.assertTrue((self.root / "vaults" / "alpha-v3" / "overlay.json").exists(), "the overlay still lands")
         self.assertEqual(self.inbox_ids(), [1, 2, 3], "events still land")
         self.assertEqual(self.runs[-1]["status"], "failed")
+
+    def test_overlay_that_does_not_hash_to_its_sha_is_not_written(self) -> None:
+        # The portal advertises OVERLAY_SHA in both places but serves different json.
+        tampered = dict(OVERLAY_JSON, tampered=True)
+        self.portal.route("GET", "/api/sync/v1/participants/u_alpha/overlay", self._overlay("u_alpha", 2, OVERLAY_SHA, tampered))
+        code, _out, err = self.pull()
+        self.assertEqual(code, sync.IntegrityError.exit_code)
+        self.assertIn("does not hash to its sha256", err)
+        self.assertFalse((self.root / "vaults" / "alpha-v3" / "overlay.json").exists())
+        self.assertEqual(self.inbox_ids(), [1, 2, 3], "events still land")
+
+    def test_overlay_hash_rule_matches_the_contract(self) -> None:
+        self.assertEqual(sync.overlay_sha256({"b": 1, "a": {"d": "é", "c": [1, 2]}}),
+                         hashlib.sha256('{"a":{"c":[1,2],"d":"é"},"b":1}'.encode("utf-8")).hexdigest())
 
     def test_pull_refuses_env_mismatch_before_writing_anything(self) -> None:
         self.portal.route("GET", "/api/sync/v1/ping", lambda _r: json_reply(200, ping_body("production")))

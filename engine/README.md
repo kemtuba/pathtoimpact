@@ -1,6 +1,6 @@
 # engine/sync.py
 
-The reference client for the portal's sync contract, version 1. It is the only thing on the Mac that talks to pathtoimpact.us. Kem copies it into the Career vault and runs it from there. The contract it speaks is section 4 of docs/implementation-plan.md, and docs/sync-contract.md once that exists.
+The reference client for the portal's sync contract, version 1. It is the only thing on the Mac that talks to pathtoimpact.us. Kem copies it into the Career vault and runs it from there. The contract it speaks is docs/sync-contract.md, which restates section 4 of docs/implementation-plan.md.
 
 Today it has three commands: `ping`, `pull` and `run`. The push commands (push-postings, push-build, push-master, push-profiles, vault-created, ack-deletion, digest-send) come in WS4 step 7.
 
@@ -14,7 +14,7 @@ Python 3.9 or later, standard library only. Nothing to pip install.
 python3 --version   # must print 3.9 or later
 ```
 
-Apple's Command Line Tools python3 has been 3.9 for several macOS releases, which is enough; the command above settles it. The CI job planned in checklist step 10 byte-compiles sync.py and runs these tests on 3.9. Until then, `vermin --target=3.9- --violations engine/sync.py engine/tests/test_sync.py` checks the floor statically.
+Apple's Command Line Tools python3 has been 3.9 for several macOS releases, which is enough; the command above settles it. The CI job "Engine client on Python 3.9" in .github/workflows/ci.yml byte-compiles sync.py and runs these tests on Python 3.9 for every pull request.
 
 ## Install on the Mac
 

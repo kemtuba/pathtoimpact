@@ -44,10 +44,12 @@ export const buildStatus = z.enum([
 
 /** Legal build transitions. The sync endpoints and the user actions both check against this. */
 export const buildTransitions: Record<z.infer<typeof buildStatus>, readonly z.infer<typeof buildStatus>[]> = {
-  requested: ["drafting", "building", "cancelled", "failed"],
+  // drafting and building are optional progress pushes: the engine may go
+  // straight to draft_review or uploading, as the contract's call order says.
+  requested: ["drafting", "draft_review", "building", "uploading", "cancelled", "failed"],
   drafting: ["draft_review", "failed"],
   draft_review: ["approved_draft", "cancelled", "failed"],
-  approved_draft: ["building", "failed"],
+  approved_draft: ["building", "uploading", "failed"],
   building: ["uploading", "failed"],
   uploading: ["uploading", "ready", "failed"],
   ready: ["uploading", "downloaded", "sent"],

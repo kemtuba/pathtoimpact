@@ -7,6 +7,8 @@ import { httpUrl, isoDate, textId, weekKeySchema } from "./events";
  * Engine-owned vocabularies (fit, status, tier_hint, source_board) are plain
  * strings, so a new value needs no portal release. Objects are strict: an
  * unknown key from the engine is an error here, not something stored silently.
+ * The route parses only the envelope as a whole; each item goes through
+ * checkPostingItem, so one bad item is rejected alone and never aborts the rest.
  */
 
 /**
@@ -88,20 +90,42 @@ export const postingItem = z
 
 export type PostingItem = z.output<typeof postingItem>;
 
+// The upsert is one multi-row INSERT ON CONFLICT, which Postgres refuses when two rows share a key.
+function uniqueExternalIds(body: { postings: ReadonlyArray<{ external_id: string }> }): boolean {
+  return new Set(body.postings.map((p) => p.external_id)).size === body.postings.length;
+}
+const uniqueExternalIdsIssue = { message: "external_id must be unique within a request", path: ["postings"] };
+
+/**
+ * What the route parses. A failure here, and only here, fails the whole
+ * request with 422: a bad run_id, week_key or user_id, more than
+ * POSTINGS_PER_REQUEST items, an item that is not an object or has no
+ * external_id, or two items sharing an external_id.
+ */
 export const postingsRequest = z
+  .strictObject({
+    run_id: z.uuid(),
+    week_key: weekKeySchema,
+    user_id: textId,
+    postings: z.array(z.looseObject({ external_id: textId })).max(POSTINGS_PER_REQUEST),
+  })
+  .refine(uniqueExternalIds, uniqueExternalIdsIssue);
+
+export type PostingsRequest = z.output<typeof postingsRequest>;
+
+/**
+ * The same body with every item held to postingItem. contracts/posting-export.schema.json
+ * publishes this, so the engine can check its own export before sending. The
+ * portal never parses a body with it: an item that fails is rejected alone.
+ */
+export const postingsRequestForEngine = z
   .strictObject({
     run_id: z.uuid(),
     week_key: weekKeySchema,
     user_id: textId,
     postings: z.array(postingItem).max(POSTINGS_PER_REQUEST),
   })
-  // The upsert is one multi-row INSERT ON CONFLICT, which Postgres refuses when two rows share a key.
-  .refine((body) => new Set(body.postings.map((p) => p.external_id)).size === body.postings.length, {
-    message: "external_id must be unique within a request",
-    path: ["postings"],
-  });
-
-export type PostingsRequest = z.output<typeof postingsRequest>;
+  .refine(uniqueExternalIds, uniqueExternalIdsIssue);
 
 const count = z.number().int().nonnegative();
 
@@ -129,12 +153,13 @@ export const SCRUB_REASONS = [
 export type ScrubReason = (typeof SCRUB_REASONS)[number];
 
 /**
- * /Users/<name>/ or /home/<name>/, or ~/, at the start of a string or after
- * whitespace or a quote. The anchor is what lets https://example.com/home/jobs/
- * pass: there the slash follows a letter. The tilde takes the same anchors, so
- * a path pasted mid-excerpt is caught too.
+ * /Users/<name>/ or /home/<name>/, or ~/, at the start of a string or after any
+ * character that cannot end a URL host or path segment: whitespace, quotes,
+ * brackets, "(", "=", ",", ":" and "/", so file:// URIs and markdown links are
+ * caught. A letter, digit, ".", "~", "%" or "-" before the slash means a URL
+ * path, which is why https://example.com/home/jobs/ passes.
  */
-export const FILESYSTEM_PATH_PATTERN = /(?:^|[\s"'`‘’“”])(?:\/(?:Users|home)\/[^/\s]+\/|~\/)/;
+export const FILESYSTEM_PATH_PATTERN = /(?:^|[^\w.~%-])(?:\/(?:Users|home)\/[^/\s]+\/|~\/)/;
 
 const CARD_JSON_KEY_SET: ReadonlySet<string> = new Set(CARD_JSON_KEYS);
 
@@ -188,4 +213,27 @@ export function scrubPosting(
     return "foreign_user_id";
   }
   return null;
+}
+
+export type PostingCheck =
+  | { ok: true; item: PostingItem }
+  | { ok: false; reason: ScrubReason | "validation"; issues?: string[] };
+
+/**
+ * One item of a postings push: the scrub first, then the item schema. A
+ * failure goes into the response's rejected list with its reason; the rest
+ * of the request is stored.
+ */
+export function checkPostingItem(
+  raw: Readonly<Record<string, unknown>>,
+  bodyUserId: string,
+  otherUserIds: readonly string[],
+): PostingCheck {
+  const reason = scrubPosting(raw, bodyUserId, otherUserIds);
+  if (reason) return { ok: false, reason };
+  const parsed = postingItem.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, reason: "validation", issues: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`) };
+  }
+  return { ok: true, item: parsed.data };
 }

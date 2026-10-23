@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { CONTRACT_VERSION } from "@/lib/limits";
 import { syncEnv } from "@/lib/env";
-import { checkSyncRequest } from "@/lib/sync/auth";
+import { checkSyncRequest, syncError } from "@/lib/sync/auth";
 import { weekKey } from "@/lib/week";
 
 /**
@@ -13,11 +13,17 @@ export async function GET(request: Request) {
   const refusal = checkSyncRequest(request);
   if (refusal) return refusal;
   const now = new Date();
-  return NextResponse.json({
-    ok: true,
-    at: now.toISOString(),
-    env: syncEnv(),
-    contract_version: CONTRACT_VERSION,
-    week_key: weekKey(now),
-  });
+  try {
+    return NextResponse.json({
+      ok: true,
+      at: now.toISOString(),
+      env: syncEnv(),
+      contract_version: CONTRACT_VERSION,
+      week_key: weekKey(now),
+    });
+  } catch (error) {
+    // An invalid DEFAULT_TIMEZONE or SYNC_ENV lands here.
+    const detail = error instanceof Error ? error.message : "unknown problem";
+    return syncError(500, "state", `The portal's sync configuration is invalid. ${detail}`);
+  }
 }

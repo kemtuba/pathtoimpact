@@ -8,9 +8,11 @@ import {
   REASON_CODE_MAPPING,
   REPORT_ONLY_FIELDS,
   cardJson,
+  checkPostingItem,
   eventsResponse,
   overlay,
   postingsRequest,
+  postingsRequestForEngine,
   profilesRequest,
   scrubPosting,
   syncEvent,
@@ -69,9 +71,33 @@ function body(postings: unknown[]) {
 
 describe("posting export", () => {
   it("accepts a realistic posting and scrubs it clean", () => {
-    const parsed = postingsRequest.safeParse(body([posting()]));
-    expect(parsed.success).toBe(true);
+    expect(postingsRequest.safeParse(body([posting()])).success).toBe(true);
+    expect(postingsRequestForEngine.safeParse(body([posting()])).success).toBe(true);
     expect(scrubPosting(posting(), USER, [OTHER_USER])).toBeNull();
+    expect(checkPostingItem(posting(), USER, [OTHER_USER]).ok).toBe(true);
+  });
+
+  it("rejects bad items one at a time and keeps the rest of the request", () => {
+    const items = [
+      posting(),
+      posting({ external_id: "b", card_json: { summary: "ok", salary: "x" } }),
+      posting({ external_id: "c", url: "ftp://example.com/x" }),
+      posting({ external_id: "d", excerpt: "x".repeat(EXCERPT_MAX_CHARS + 1) }),
+      posting({ external_id: "e", comp_min: 200000, comp_max: 100000 }),
+    ];
+    const parsed = postingsRequest.safeParse(body(items));
+    expect(parsed.success).toBe(true);
+    const reasons = items.map((item) => {
+      const check = checkPostingItem(item, USER, []);
+      return check.ok ? "stored" : check.reason;
+    });
+    expect(reasons).toEqual(["stored", "card_json_key", "url_not_http", "excerpt_too_long", "validation"]);
+  });
+
+  it("fails the whole request only for envelope problems", () => {
+    expect(postingsRequest.safeParse(body([{ company: "no id" }])).success).toBe(false);
+    expect(postingsRequest.safeParse({ ...body([posting()]), run_id: "not-a-uuid" }).success).toBe(false);
+    expect(postingsRequest.safeParse(body(Array.from({ length: 201 }, (_, i) => posting({ external_id: `n${i}` })))).success).toBe(false);
   });
 
   it("exports exactly the card_json allowlist to JSON Schema", () => {
@@ -82,8 +108,8 @@ describe("posting export", () => {
 
   it("refuses more than 2,000 characters of excerpt, counted in code points", () => {
     const astral = "\u{1F600}".repeat(EXCERPT_MAX_CHARS); // 2,000 characters, 4,000 UTF-16 units
-    expect(postingsRequest.safeParse(body([posting({ excerpt: astral })])).success).toBe(true);
-    expect(postingsRequest.safeParse(body([posting({ excerpt: `${astral}x` })])).success).toBe(false);
+    expect(checkPostingItem(posting({ excerpt: astral }), USER, []).ok).toBe(true);
+    expect(checkPostingItem(posting({ excerpt: `${astral}x` }), USER, [])).toMatchObject({ ok: false, reason: "excerpt_too_long" });
   });
 
   it("refuses two items with the same external_id in one request", () => {
@@ -114,10 +140,26 @@ describe("export scrub", () => {
     expect(scrubPosting(posting({ excerpt: `Apply at ${url} by Friday.` }), USER, [])).toBeNull();
   });
 
-  it("rejects a javascript: url, and zod refuses it too", () => {
+  it("rejects a javascript: url, and the item schema refuses it too", () => {
     const item = posting({ url: "javascript:alert(1)" });
     expect(scrubPosting(item, USER, [])).toBe("url_not_http");
-    expect(postingsRequest.safeParse(body([item])).success).toBe(false);
+    expect(postingsRequestForEngine.safeParse(body([item])).success).toBe(false);
+  });
+
+  it("catches paths in links, after punctuation and as file URIs", () => {
+    for (const text of [
+      "[resume](/Users/kem/Career/vaults/x/resume.pdf)",
+      "(/Users/kem/Career/x.md)",
+      "file:///Users/kem/Career/x.md",
+      "path=/home/kem/vault/",
+      "a,/Users/kem/x/y",
+      "see:~/vault/x",
+    ]) {
+      expect(scrubPosting(posting({ fit_why: text }), USER, []), text).toBe("filesystem_path");
+    }
+    for (const text of ["https://acme.com/home/jobs/", "https://acme.com/a/home/b/c", "https://x.edu/~kem/"]) {
+      expect(scrubPosting(posting({ excerpt: `Apply at ${text} today.` }), USER, []), text).toBeNull();
+    }
   });
 
   it("rejects another participant's user id anywhere in the item, url included", () => {

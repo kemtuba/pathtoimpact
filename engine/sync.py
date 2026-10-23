@@ -2,8 +2,8 @@
 """Reference client for the pathtoimpact.us sync contract, version 1.
 
 Kem copies this file into the Career vault on the Mac. It speaks the contract
-in section 4 of docs/implementation-plan.md (and docs/sync-contract.md once it
-exists). Python 3.9 or later, standard library only.
+in docs/sync-contract.md, which restates section 4 of
+docs/implementation-plan.md. Python 3.9 or later, standard library only.
 
 Commands:
   ping   check the portal's env, week key and contract version
@@ -166,6 +166,17 @@ def _parse_envelope(body: bytes) -> Tuple[Optional[str], Optional[str], str]:
         more = f" (and {len(issues) - 10} more)" if len(issues) > 10 else ""
         issues_text = " Issues: " + "; ".join(shown) + more + "."
     return code, message, issues_text
+
+
+def _envelope_message(body: bytes) -> Optional[str]:
+    """The message from the contract's error envelope, or None."""
+    try:
+        parsed = json.loads(body.decode("utf-8")) if body else None
+    except (UnicodeDecodeError, ValueError):
+        return None
+    error = parsed.get("error") if isinstance(parsed, dict) else None
+    message = error.get("message") if isinstance(error, dict) else None
+    return message if isinstance(message, str) and message else None
 
 
 def error_for_status(where: str, base_url: str, status: int, body: bytes, location: Optional[str] = None) -> SyncError:
@@ -380,7 +391,8 @@ class Client:
             location = exc.headers.get("Location") if exc.headers is not None else None
             exc.close()
             if exc.code >= 500 or exc.code == 429:
-                raise _Retryable(f"HTTP {exc.code}") from None
+                said = _envelope_message(data)
+                raise _Retryable(f"HTTP {exc.code}" + (f" ({said})" if said else "")) from None
             raise error_for_status(where, self.base_url, exc.code, data, location) from None
         except urllib.error.URLError as exc:
             if isinstance(exc.reason, ssl.SSLCertVerificationError):
@@ -661,6 +673,12 @@ def _sha(value: Any, what: str) -> str:
     return text
 
 
+def overlay_sha256(obj: Any) -> str:
+    """The contract's overlay hash: keys sorted at every level, no whitespace, UTF-8."""
+    text = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def pull_overlay(client: Client, user_id: str, listed: Mapping[str, Any], vault_dir: Path, entry: Dict[str, Any], log: Log) -> bool:
     """Writes overlay.json when the approved version is newer than the local copy. Returns True when written."""
     version = _as_int(listed.get("version"))
@@ -687,6 +705,10 @@ def pull_overlay(client: Client, user_id: str, listed: Mapping[str, Any], vault_
         )
     if not isinstance(answer.get("json"), dict):
         raise IntegrityError(f"The overlay for {user_id} version {version} has no json object.")
+    if overlay_sha256(answer["json"]) != sha:
+        raise IntegrityError(
+            f"The overlay for {user_id} version {version} does not hash to its sha256 under the contract's rule. Nothing was written."
+        )
     try:
         _write_json_file(target, answer["json"])
     except OSError as exc:
