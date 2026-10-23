@@ -12,7 +12,7 @@ Kem accepted the plan's recommendation on all eleven week-1 decisions.
 
 | # | Decision | Choice | What it sets in motion |
 |---|---|---|---|
-| 1 | The Capital Clarity page | Retire it from this repository behind the tag archive/capital-clarity, with a neutral holding page at the root | WS13 step 1 moves into week 1. It runs once Kem says where the page lives today, where the offer moves, and what happens to Typeform respondents |
+| 1 | The Capital Clarity page | Hidden for now. The root shows a holding page, and the page is preserved under the tag archive/capital-clarity. No new home and no redirect yet | Done on the working branch in commit 2d83e2a, which reaches the live site when the branch merges into main. The tag's message carries the restore command |
 | 2 | Hosting | Vercel Hobby until the first invite, then Pro before week 6 | Draft 1 offered no recommendation. This one was added on 23 Oct when Kem accepted the week-1 recommendations, and it can change with no code change |
 | 3 | Auth | Built fresh on better-auth 1.7.12, from the proof's wiring | WS1 as written |
 | 4 | Invites | Operator-created accounts, sign-up disabled, a 7-day hashed invite token | WS1 step 6 |
