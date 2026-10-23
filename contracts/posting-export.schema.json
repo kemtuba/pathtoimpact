@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Body of POST /api/sync/v1/postings. card_json may carry only the keys listed here.",
+  "properties": {
+    "postings": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "card_json": {
+            "additionalProperties": false,
+            "properties": {
+              "employment_type": {
+                "type": "string"
+              },
+              "highlights": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "requirements": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "team": {
+                "type": "string"
+              },
+              "work_mode": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "comp_max": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comp_min": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "company": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "excerpt": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "external_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "facets": {
+            "additionalProperties": false,
+            "properties": {
+              "competitive": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "domain": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "employer_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "level": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "logistics": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "title_match": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "competitive",
+              "domain",
+              "employer_type",
+              "level",
+              "logistics",
+              "title_match"
+            ],
+            "type": "object"
+          },
+          "fit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "fit_why": {
+            "type": "string"
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pick_reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "posting_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profile_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "proposed": {
+            "type": "boolean"
+          },
+          "rank": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "role": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source_board": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tier_hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "format": "uri",
+            "pattern": "^https?:\\/\\/",
+            "type": "string"
+          },
+          "user_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "card_json",
+          "comp_max",
+          "comp_min",
+          "company",
+          "excerpt",
+          "external_id",
+          "facets",
+          "fit",
+          "fit_why",
+          "location",
+          "pick_reason",
+          "posting_date",
+          "profile_id",
+          "proposed",
+          "rank",
+          "role",
+          "source_board",
+          "status",
+          "status_date",
+          "tier_hint",
+          "url"
+        ],
+        "type": "object"
+      },
+      "maxItems": 200,
+      "type": "array"
+    },
+    "run_id": {
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string"
+    },
+    "user_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "week_key": {
+      "pattern": "^\\d{4}-W\\d{2}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "postings",
+    "run_id",
+    "user_id",
+    "week_key"
+  ],
+  "title": "Postings push",
+  "type": "object",
+  "x-contract-version": "1.0.0"
+}

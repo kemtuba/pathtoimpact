@@ -65,6 +65,8 @@ export const applicationState = z.enum(["sent", "follow_up_due", "second_follow_
 
 export const deletionStatus = z.enum(["requested", "portal_purged", "vault_pending", "done"]);
 
+export const deletionReason = z.enum(["user", "retention", "consent_revoked"]);
+
 export const decisionKind = z.enum(["apply", "stretch", "pass"]);
 
 export const replyKind = z.enum(["screen", "interview", "offer", "rejected", "no_response", "withdrawn"]);
