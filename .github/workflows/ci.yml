@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Reads the pnpm version from packageManager in package.json.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm db:check
+      - name: Migrations are committed
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --porcelain -- drizzle/)" ]; then
+            echo "The schema changed without a committed migration. Run pnpm db:generate and commit drizzle/."
+            git status --porcelain -- drizzle/
+            exit 1
+          fi
+      - name: Contract schemas are committed
+        run: |
+          pnpm contracts:json
+          if [ -n "$(git status --porcelain -- contracts/)" ]; then
+            echo "src/lib/contracts changed without regenerating contracts/. Run pnpm contracts:json and commit."
+            git status --porcelain -- contracts/
+            exit 1
+          fi
+      - name: Build
+        run: pnpm build
+        env:
+          # Dummy values: better-auth reads both on import, so the build needs them.
+          BETTER_AUTH_SECRET: ci-only-placeholder-not-a-real-secret-0123456789
+          BETTER_AUTH_URL: http://localhost:3000
+
+  engine:
+    name: Engine client on Python 3.9
+    runs-on: ubuntu-latest
+    # The plan's floor for sync.py is Python 3.9, which the Mac may still run.
+    container: python:3.9-slim
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m py_compile engine/sync.py
+      - run: python -m unittest discover -s engine/tests -t . -v
