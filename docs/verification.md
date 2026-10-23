@@ -27,7 +27,7 @@ The session's proxy still refuses neon.tech, console.neon.tech, vercel.com and a
 | 11 CLAUDE.md | Written |
 | 12 setup.md, README.md | Written; docs/decisions.md unchanged, no decision landed |
 | 13 All green | See below |
-| 14 Pull request | See below |
+| 14 Pull request | Opened as kemtuba/pathtoimpact#3. CI and the Vercel preview passed on its first run, below |
 
 ### Smoke test, next start on Next 16.4.2
 
@@ -59,6 +59,16 @@ The session's proxy still refuses neon.tech, console.neon.tech, vercel.com and a
 | pnpm build with dummy auth values | passed |
 | pnpm build with no auth values | exits 0, logs better-auth errors; sign-in would fail at run time |
 | scripts/vercel-build.sh with VERCEL_ENV=production and a dead database URL | runs migrate.ts, which fails on the connection as it should |
+
+### On the pull request, head 4484a60
+
+| Check | Result |
+|---|---|
+| CI: Lint, typecheck, test, build | passed in GitHub Actions |
+| CI: Engine client on Python 3.9 | passed in python:3.9-slim, so the 3.9 floor is now shown by a real run as well as by vermin |
+| Vercel preview | Ready at https://pathtoimpact-git-claude-epic-cori-s93zjr-kems-projects-c9c438de.vercel.app, built by the existing project with its current settings |
+
+The Claude GitHub App is not installed on this repository, so PR events do not reach Claude sessions. CI was read directly.
 
 ### Findings worth keeping
 
