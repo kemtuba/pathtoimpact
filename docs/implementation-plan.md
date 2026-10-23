@@ -1,4 +1,4 @@
-# pathtoimpact.us portal: implementation plan, draft 1.1, 23 Oct 2026
+# pathtoimpact.us portal: implementation plan, draft 1.2, 23 Oct 2026
 
 Written for Kem. This plan implements the Build Scope, draft 1 of 21 Oct 2026, in the repository kemtuba/pathtoimpact. It is a plan, not code: nothing in the repository changes until Kem answers the week-1 decisions in section 9. It starts from the plan the two judges favoured, the operator's week first, and folds in every graft and every blind spot the judges named.
 
@@ -6,7 +6,9 @@ Source tags used throughout: [scope] is the Build Scope draft 1; [facts] is the 
 
 Companion files in this folder: docs/plan/research-notes.md holds every verified vendor claim with its source and confidence; docs/plan/proof-of-stack.patch is the wiring the feasibility proof built and smoke-tested on this scaffold, ready for git apply; docs/plan/README.md says how this plan was produced and what each file is for.
 
-## Revision note, draft 1.1
+## Revision notes
+
+Draft 1.2 records Kem's week-1 decisions. On 23 Oct Kem accepted this plan's recommendation on all eleven. Hosting, decision 2, had no recommendation, so one was made the same day and is marked as such. Section 9 marks each of the eleven decided, and docs/decisions.md is the running record. The rest of this note describes draft 1.1.
 
 Draft 1 went to two adversarial critics: one checked it against the scope section by section, the other against platform limits, security and failure recovery. They returned 67 findings. Every high-severity finding is fixed here, and almost every other one is too. The changes that matter most:
 
@@ -36,7 +38,7 @@ The scope says auth, schema, email and provisioning are lifted from gallery-os. 
 
 The only route today, src/app/page.tsx, is a landing page for a different offer: the Capital Clarity Session, a 175 dollar one-to-one funding session for NYC founders, with an embedded Typeform, form id ONoqryDd, under the footer "Path to Impact" [facts]. src/app/layout.tsx still carries the "Create Next App" metadata [facts]. What happens to that page is not decided anywhere [facts], and it matters twice. First, Vercel's fair-use definition counts advertising the sale of a product or service as commercial use, which a Hobby plan does not allow [research]. Second, the scope's landing page has to say the portal is free, that a person runs it weekly, that nothing is auto-submitted, and that a separate placement business exists [scope], which collides with a paid funding offer at the same root under the same name.
 
-The interim layout this plan adopts: the portal lives under /app, the operator console under /admin, the auth pages under /sign-in, /set-password, /forgot-password and /verify-email, and the proxy matcher covers only /app and /admin. The root route is not touched until Kem answers decision 1, and the page keeps building unchanged alongside the new stack [proof]. Deploying the repository as it stands would put the paid offer on the new Vercel project, which is the commercial use decision 2 is about. So decision 1 is a week-1 decision with no default. Until Kem answers it, sessions build and test locally and in continuous integration, and no Vercel deployment is connected.
+The interim layout this plan adopts: the portal lives under /app, the operator console under /admin, the auth pages under /sign-in, /set-password, /forgot-password and /verify-email, and the proxy matcher covers only /app and /admin. The page keeps building unchanged alongside the new stack [proof] until WS13 step 1 removes it. Deploying the repository as it stands would put the paid offer on the new Vercel project, which is the commercial use decision 2 is about. On 23 Oct Kem decided to retire the page, decision 1. Until WS13 step 1 has done that, sessions build and test locally and in continuous integration, and no Vercel deployment is connected.
 
 ### Out of scope here
 
@@ -357,8 +359,8 @@ Effort is in session-days [plan]. Tests are two tiers throughout: contract-tier 
 | Steps | 1 git apply docs/plan/proof-of-stack.patch, which carries the proof's package additions, .env.example, drizzle.config.ts, drizzle/0000 and meta, src/lib/db.ts, auth.ts, auth-schema.ts, proxy.ts, the auth route, the sync ping route; add !.env.example to .gitignore; set the proxy matcher to /app and /admin with its redirect to /sign-in; add a stub sign-in page; switch the ping route to compare the sha256 of the presented token against SYNC_TOKEN_SHA256; replace the layout's Create Next App metadata. 2 Upgrade next and eslint-config-next to 16.4.2, react to 19.3.1, @types/node to 22; engines node 22 or later; cacheComponents left off; re-run the proof's build and smoke checks. 3 Install react-email, vitest and tsx and rebuild, closing the dependency gap the proof did not cover. 4 Write scripts/make-sync-token.ts, scripts/migrate.ts using the neon-http migrator and scripts/vercel-build.sh, then add the package scripts, all .ts scripts run through tsx: typecheck, test, db:generate, db:migrate via scripts/migrate.ts using the neon-http migrator, db:check, auth:generate, contracts:json, build:vercel. 5 src/lib/env.ts. 6 Portal placeholder at /app and the auth page shells; proxy matcher /app and /admin; root untouched. 7 CI workflow: install frozen, lint, typecheck, contract tests, drizzle-kit check, migration-committed guard, next build with dummy auth secret and URL, and a Python 3.9 job for engine/sync.py. If the session cannot push workflow files, Kem commits ci.yml from the session's draft. 8 docs/setup.md, docs/decisions.md with the defaults from section 9, CLAUDE.md, README. 9 Silence the postcss lint warning. |
 | Files | package.json, pnpm-lock.yaml, .gitignore, .env.example, next.config.ts, drizzle.config.ts, drizzle/, src/lib/db.ts, src/lib/auth.ts, src/lib/auth-schema.ts, src/lib/env.ts, src/proxy.ts, src/app/api/auth/[...all]/route.ts, src/app/api/sync/v1/ping/route.ts, src/app/app/page.tsx, scripts/migrate.ts, scripts/vercel-build.sh, .github/workflows/ci.yml, CLAUDE.md, README.md, docs/setup.md, docs/decisions.md |
 | Effort | 2 |
-| Depends on | nothing for the code; decision 1 for any Vercel deployment |
-| Exit | the branch builds clean on 16.4.2 with only the two auth variables; CI green on a pull request; next start answers /api/sync/v1/ping with 401 without a token and 200 with one; once decision 1 lets Vercel connect, the staging host builds a session-authored commit |
+| Depends on | nothing for the code; WS13 step 1 for any Vercel deployment |
+| Exit | the branch builds clean on 16.4.2 with only the two auth variables; CI green on a pull request; next start answers /api/sync/v1/ping with 401 without a token and 200 with one; once WS13 step 1 has retired the paid page and Vercel is connected, the staging host builds a session-authored commit |
 | Tested by | the proof's smoke script re-run; CI; one manual preview check |
 
 ### WS1 Auth, roles, invites, email sender
@@ -497,10 +499,10 @@ Effort is in session-days [plan]. Tests are two tiers throughout: contract-tier 
 
 | | |
 |---|---|
-| Steps | 1 Execute decision 1: under option a, tag archive/capital-clarity, remove the Typeform widget and @typeform/embed-react, and add a redirect if Kem names a new home. 2 The root landing from content/landing.md with the scope's four statements: the tool is free, a person runs it weekly, nothing is auto-submitted, and a separate placement business exists [scope]; no copy from the retired era [scope]. 3 /privacy, /terms and /consent from counsel's text, each carrying its version, with the Neon history, snapshot and Resend retention windows stated. 4 A test that each rendered consent page matches its consent_text row by sha256. |
+| Steps | 1 In week 1, execute decision 1, option a: tag archive/capital-clarity, remove the Typeform widget and @typeform/embed-react, put a neutral holding page at the root with no copy from the retired era [scope], and add a redirect if Kem names a new home for the offer. 2 The root landing from content/landing.md with the scope's four statements: the tool is free, a person runs it weekly, nothing is auto-submitted, and a separate placement business exists [scope]; no copy from the retired era [scope]. 3 /privacy, /terms and /consent from counsel's text, each carrying its version, with the Neon history, snapshot and Resend retention windows stated. 4 A test that each rendered consent page matches its consent_text row by sha256. |
 | Files | src/app/page.tsx, src/app/privacy, terms, consent, content/*.md, package.json, tests/contract/consent-text.test.ts |
 | Effort | 1 |
-| Depends on | decision 1; the counsel need |
+| Depends on | step 1: the Capital Clarity need in section 8; steps 2 to 4: the counsel need |
 | Exit | the root says the four statements; no paid offer is served by this deployment; every consent row cites a text a user can read at its version |
 | Tested by | the sha256 test; a manual read by Kem |
 
@@ -510,11 +512,11 @@ Total in this repo: about 41 session-days [plan], after the critique's additions
 
 | Milestone | Weeks | Workstreams | What is demoable | Who tests | Kem hours |
 |---|---|---|---|---|---|
-| M0 Base and contract published | 1 | WS0; WS4 step 1 | CI is green on a pull request; next start answers ping 200 with the token and 401 without; docs/sync-contract.md, contracts/*.schema.json and engine/sync.py ping are on the branch; once decision 1 lets Vercel connect, the staging host builds the same commit | Kem runs python3 engine/sync.py ping from the Mac | about 4: accounts, DNS, secrets, decisions, the operator sign-in [plan] |
+| M0 Base and contract published | 1 | WS0; WS4 step 1; WS13 step 1 | CI is green on a pull request; next start answers ping 200 with the token and 401 without; docs/sync-contract.md, contracts/*.schema.json and engine/sync.py ping are on the branch; the paid page is retired behind its tag; once Vercel is connected, the staging host builds the same commit | Kem runs python3 engine/sync.py ping from the Mac | about 4: accounts, DNS, secrets, decisions, the operator sign-in [plan] |
 | M1 The operator's week before any user | 2 | WS1; WS2 schema and migrations; WS3 Week, Participants, Runs, Time; WS4 runs and events | Kem signs in as operator on the staging host and sees an empty /admin; migrations are applied to the staging branch. On Sunday Kem wraps the existing sweep with sync.py run and sees it in /admin/runs with duration; logs the Sunday time from the prefilled button; invites a second address and lands in /app after set-password; the skip-week banner shows because no push exists | Kem on the staging host, then production; a session or CI on the staging branch | about 3 plus the sweep they already run [plan] |
 | M2 Intake to vault with Kem as user zero | 3 to 4 | WS5; WS3 intake approval and profiles; WS4 pull complete, resume download, vault-created, profiles push; contracts/profiles V3 and V4 | Kem completes the six forms as user zero in under 45 minutes, uploads a resume, approves the intake in /admin, and sync.py pull writes the overlay and resume on the Mac; the overlay validates; vault-created moves the participant | Kem as user and as operator; the second test address through intake | about 6 plus engine phase 1 work starting now [plan] |
 | M3 The loop, first real Sunday to Friday | 5 | WS4 postings, builds, masters; WS6; WS8 digest and transactional mail; WS11 export through the new path | A real week's export for the user-zero vault lands in /app/week; the digest arrives once; Kem decides every proposal with codes, requests a resume, pushes the gated PDF, downloads it, records I applied and a reply; the Friday prompt and operator summary arrive; the time log is under the ceiling. M3's metrics count the user-zero vault only; Kem's own vault stays outside the portal under decision 18. If the engine slips, M3 runs on the synthetic fixtures/sample-export.json and the real loop moves to the week the engine lands | Kem end to end | about 6 plus the rest of engine phase 1 [plan] |
-| M4 Ready for invites | 6 | WS7; WS8 Friday prompts, retention; WS9; WS10 first pass; WS12 drill on preview | Skip-week drill passes on a preview; a test user is deleted end to end and leaves no rows; counsel-reviewed wording is live; decision 1 executed; the first three invited users finish intake in under 45 minutes and receive their first weekly list, the scope's phase-2 exit [scope] | Kem, the three invitees | 9 to 15: onboarding is 3 to 5 hours per user [scope], three users, spread over weeks 6 and 7 |
+| M4 Ready for invites | 6 | WS7; WS8 Friday prompts, retention; WS9; WS10 first pass; WS12 drill on preview | Skip-week drill passes on a preview; a test user is deleted end to end and leaves no rows; counsel-reviewed wording and the pilot landing are live; the first three invited users, in V3 and V4, finish intake in under 45 minutes and receive their first weekly list, the scope's phase-2 exit [scope] | Kem, the three invitees | 9 to 15: onboarding is 3 to 5 hours per user [scope], three users, spread over weeks 6 and 7 |
 | M5 Pilot operations and the four-week review | 7 to 12 | WS10; WS12; fixes; WS11 phase 2 items | Week 8: a deliberate production skip week yields a correct digest and no stalled state; week 10: /admin/profiles shows precision, yield and screens against thresholds; six weeks of outcomes for every user by week 12 [scope] | Kem weekly; users on their own screens | 8 to 12 a week, the scope's ceiling [scope] |
 
 Reconciliation with Kem's time. The scope budgets 65 to 85 hours across phases 0 to 2 over about six weeks [scope]. Counting everything this plan asks of Kem, the total runs over that budget.
@@ -529,7 +531,7 @@ Reconciliation with Kem's time. The scope budgets 65 to 85 hours across phases 0
 | Reviewing and merging about 30 pull requests at 20 minutes each | about 10 | [plan] |
 | Total | 78 to 97 | against 65 to 85 [scope] |
 
-Decision 25 puts the gap to Kem. The levers are letting sessions merge non-schema pull requests once CI is green, which saves about 10 hours; drafting V1 and V2 after M4, which saves about half of phase 0; and moving M4 one or two weeks. M3 sits in week 5, not week 4, so engine phase 1 can spread across weeks 2 to 5. If the engine slips by two weeks, M3 and the first real push move to week 7; WS6, WS7, WS8, WS9, WS10 and the drill keep moving on fixtures; the first invites move with M3 because the scope's phase-2 exit needs a real weekly list.
+Decision 25 closed the gap on 23 Oct. Sessions now merge pull requests that change neither the schema nor the contract once CI is green, so Kem's review falls to about 3 hours. V1 and V2 are drafted after M4, so phase 0 falls to about 6 to 8 hours. That brings the total to about 65 to 82 hours, inside the scope's budget [plan]. Moving M4 by one or two weeks stays in reserve for an engine slip. M3 sits in week 5, not week 4, so engine phase 1 can spread across weeks 2 to 5. If the engine slips by two weeks, M3 and the first real push move to week 7; WS6, WS7, WS8, WS9, WS10 and the drill keep moving on fixtures; the first invites move with M3 because the scope's phase-2 exit needs a real weekly list.
 
 ## 8 Needs from Kem
 
@@ -537,7 +539,7 @@ Decision 25 puts the gap to Kem. The levers are letting sessions merge non-schem
 
 | Item | Why | Needed before | Workaround |
 |---|---|---|---|
-| Answers to decisions 1, 2, 3, 4, 6, 8, 10, 12, 14, 15 and 25, or consent to their defaults | they fix the deployment, hosting, auth shape, storage, merge policy, profile mirror, preview data, operator identity, verification semantics and the time budget that WS0 to WS2 encode | day 1 | the recommendations apply if no answer arrives by day 2, except decision 1, which has no default; reversing 6 after WS5 costs about a day [plan] |
+| Answers to decisions 1, 2, 3, 4, 6, 8, 10, 12, 14, 15 and 25 | they fix the deployment, hosting, auth shape, storage, merge policy, profile mirror, preview data, operator identity, verification semantics and the time budget that WS0 to WS2 encode | done 23 Oct, recorded in docs/decisions.md | reversing 6 after WS5 costs about a day [plan] |
 | Network access for this cloud environment: add *.neon.tech, *.vercel.app and the staging host under Allowed domains, keeping package managers allowed. The setting is in the environment menu in the session's title bar, then Edit, then Network access; steps at https://code.claude.com/docs/en/cloud-environments#network-access | on 23 Oct the proxy refused Neon, Vercel and Resend hosts [verified]; without them no session can migrate, run database tests or exercise a deployment | day 1 | database-tier tests run in GitHub Actions with secrets Kem sets; nothing is reported as passed without a real connection |
 | A Vercel project for kemtuba/pathtoimpact with the GitHub app, connected only after decision 1, with pathtoimpact.us on Production only once the root no longer serves the paid offer, Fluid compute on, Node 24, region iad1, build command pnpm run build:vercel, and a staging host assigned to a staging branch | sessions cannot create or configure Vercel projects; deploys happen on push; a stable preview host keeps auth cookies and mail links working | day 1 | local builds and CI still run; no preview demos |
 | Confirmation that Vercel builds commits authored by the session's git identity, by pushing one trivial commit | Vercel can skip deployments whose author is not a project member; this is outside the verified research | day 1 | for production, Kem merges so the merge commit is theirs; for previews, Kem fast-forwards the staging branch, or CI deploys with a VERCEL_TOKEN held only in GitHub secrets |
@@ -546,7 +548,7 @@ Decision 25 puts the gap to Kem. The levers are letting sessions merge non-schem
 | The staging raw sync token in the Claude Code environment, and confirmation whether Vercel deployment protection is on for previews | sessions must run sync-smoke against the staging host; protection may block bearer calls to preview URLs, which is unverified | week 1 | sessions test against next start with the staging database |
 | Branch protection on main, GitHub Actions secrets for the staging database and the staging sync token, and confirmation that a session may push workflow files | decision 8's review rule needs branch protection; CI's database tests and sync-smoke need secrets; whether a session token can push ci.yml is unverified | week 1 | Kem commits ci.yml from the session's draft |
 | Draft consent, retention, staffing and Claude-processing text, plus a privacy policy and terms, sent to counsel, with a return date by week 5 | the scope puts this in week 1 [scope]; counsel's lead time is unknown and any delay blocks the invites | week 1 to send | DRAFT text for Kem as user zero only |
-| Whether the Capital Clarity page is live today, on which host, and whether its Typeform still takes bookings | decision 1; the session could not reach pathtoimpact.us to check [verified] | week 1 | none |
+| Whether the Capital Clarity page is live today and on which host, whether its Typeform still takes bookings, and where the offer moves: kem.design or a new repository | decision 1 is to retire the page; WS13 step 1 runs once these are known; the session could not reach pathtoimpact.us to check [verified] | week 1 | none |
 | A Resend account and API key; DNS access for the sending subdomain, recommended mail.pathtoimpact.us; where pathtoimpact.us DNS is hosted and whether root-domain mail exists; a reply-to mailbox | verification takes 15 minutes to 72 hours [research]; nothing delivers to anyone but Kem until then | DNS records in week 1 | onboarding@resend.dev to Kem's own address covers M0 to M2; invite links print to the operator |
 | Kem's operator email and display name, plus a second address for testing invites | create-admin and adminUserIds need the identity; the invite path can only be tested on a non-operator address | week 1 | a plus-address alias |
 | Kem's timezone, the Mac's python3 version, and when the Sunday push usually finishes | week keys, the applied date default and the 7, 14 and 21-day clocks depend on the zone; the client's floor is 3.9; the finish time fixes digest timing, decision 9 | week 1 | America/New_York and 3.9 are assumed; the Monday backstop covers any finish time |
@@ -557,7 +559,7 @@ Decision 25 puts the gap to Kem. The levers are letting sessions merge non-schem
 | Item | Why | Needed before | Workaround |
 |---|---|---|---|
 | Sign-off on docs/sync-contract.md and a slot to run engine/sync.py against the staging host | the contract is the only interface between the two sides | end of week 2 | none; this is the M1 exit |
-| profiles V3 and V4, then V1 and V2, in contracts/profiles with kinds, tools, employer types, default screens, example titles, pay range, node and ruling status | form 1 lists them, form 3 ticks from them, form 5 ranks them | week 3 | seeds from the scope's archetype table with empty lists let the forms render |
+| profiles V3 and V4 in contracts/profiles with kinds, tools, employer types, default screens, example titles, pay range, node and ruling status; V1 and V2 after M4 under decision 25 | form 1 lists them, form 3 ticks from them, form 5 ranks them | V3 and V4 by week 3 | seeds from the scope's archetype table with empty lists let the forms render |
 | One sample export from board.py with names, employers and dates replaced, so the committed fixture holds no personal data; the real export stays in the vault | the postings contract, the fit card and the M3 fallback rest on real shapes | week 4 | a fully synthetic fixture |
 | Engine phase 1 complete enough to export through the new path for the user-zero vault, and Kem's resume uploaded as user zero | M3 is the first real loop | week 5 | M3 on fixtures; M4 cannot |
 | Counsel's returned wording for the texts sent in week 1, each with a version string | consent rows cite a consent_text version; no non-Kem user may consent to placeholder text; the landing page names a placement business and the portal holds employment records | week 5, before the invites in week 6 | DRAFT placeholders for Kem as user zero only |
@@ -571,7 +573,7 @@ Decision 25 puts the gap to Kem. The levers are letting sessions merge non-schem
 
 ## 9 Decisions for Kem
 
-Decisions marked week 1 block the first session or the first week; the stated recommendation applies by day 2 if no answer arrives, and is recorded in docs/decisions.md as a default, not as Kem's choice. Decision 1 is the exception and has no default. Each decision is tagged. "Kem's call" is a real fork only Kem can choose. "Engineering default" means this plan will act on its recommendation, so answer only to object.
+Decisions marked week 1 block the first session or the first week; the stated recommendation applies by day 2 if no answer arrives, and is recorded in docs/decisions.md as a default, not as Kem's choice. On 23 Oct Kem accepted the recommendations on all eleven week-1 decisions, so each now carries a "Decided" line. Each decision is tagged. "Kem's call" is a real fork only Kem can choose. "Engineering default" means this plan will act on its recommendation, so answer only to object.
 
 ### The scope's thirteen decisions, and where each one lands
 
@@ -581,77 +583,97 @@ The scope ends with thirteen decisions for Kem [scope]. Most of them are about t
 |---|---|---|---|
 | 1 Eval Ops ruling for V4 | Profile file: node and ruling_status | The ruling note on form 1 and in the profile mirror, and the placement list: until the ruling, users whose only profile is V4 are withheld from it, so the bench cannot count them [scope] | the V4 profile file, week 3 |
 | 2 Builder scope, B1 or none | Profile files | Nothing until a B1 file is pushed; the profiles endpoint takes it with no code change | none for M0 to M4 |
-| 3 V1 scope: clinical, actuarial, TPRM | V1 profile file | Whether V1 is listed at M4 | week 6 |
-| 4 V2 hybrid gate | V2 profile file and its posting-text gate | Whether V2 is listed at M4 | week 6 |
+| 3 V1 scope: clinical, actuarial, TPRM | V1 profile file | When V1 is listed. Under decision 25 it is drafted after M4 | after week 6 |
+| 4 V2 hybrid gate | V2 profile file and its posting-text gate | When V2 is listed. Under decision 25 it is drafted after M4 | after week 6 |
 | 5 L1 counsel profile | Profile file plus the person form | If L1 is in the pilot, form 3 gains a bar-admission field [scope]. This plan builds the credentials list from the profile's form_json, so the field appears only for L1 holders. Default: L1 out | before WS5, week 3 |
-| 6 First users, and is Kem user zero of V3 and V4 | Section 8 need; decision 12 | Invites at M4. M2 and M3 are defined around Kem being user zero, so a no moves both to the first invitee | week 1 |
+| 6 First users, and is Kem user zero of V3 and V4 | Section 8 need for the users; user zero answered yes on 23 Oct through decision 12 | Invites at M4. M2 and M3 are defined around Kem being user zero, so a no moves both to the first invitee | week 1 |
 | 7 May the live engine's exclusions be split now | Engine, WS11 | When the user-zero vault can export. M3's real loop and decision 18 assume yes; a no or a later yes moves M3, as section 7 describes | week 2 |
 | 8 SerpApi policy | Engine | Which profiles get a weekly list at M3 and M4: four lanes of 10 queries weekly are 160 of a self-capped 200 searches a month [scope]. The coverage push carries serp_searches, and /admin/runs shows the month to date | week 2 |
 | 9 The staffing statement and who reviews it | Counsel need in section 8; isolation and the dual-role fact are decision 11 below | Landing copy, consent_text staffing.v1, the placement page. This plan drafts the statement as the scope words it and does not treat it as settled | week 1 to send to counsel |
-| 10 Where profiles live | Decision 10 below | The profile table and the profiles endpoint | week 1 |
+| 10 Where profiles live | Decision 10 below, decided 23 Oct: files mirrored to the portal | The profile table and the profiles endpoint | week 1 |
 | 11 Kem's own tracks as profiles | Decision 18 below | What M3 demonstrates | week 4 |
 | 12 Confirm "backend" and what else users see | Kem's call. Assumption 1 holds the reading; decision 5 covers every judged posting | Near misses need an engine flag on the posting; the profile coverage report is one read-only page over the coverage table. Default: neither in the pilot. The scope's Sanity-editable landing page stays open; the default is code in this repo | week 5 |
-| 13 Hosting posture | Decision 2 below | Production launch to user zero | week 3 |
+| 13 Hosting posture | Decision 2 below, decided 23 Oct: Hobby, then Pro before the first invite | Production launch to user zero | week 3 |
 
-### 1 What happens to the Capital Clarity page. Week 1, Kem's call, no default
+### 1 What happens to the Capital Clarity page. Week 1, Kem's call, decided 23 Oct
 
-Options: a, retire it from this repository and domain, tag archive/capital-clarity, remove the widget and dependency, re-home the offer in kem.design or a new repository, with a redirect if a URL exists; b, keep it at /capital-clarity with no link from the portal, which forces Pro; c, keep it at the root permanently and leave the portal under /app with its own landing. Recommendation: a. Why: the page sells a 175 dollar session [facts], which is commercial under Vercel's written definition [research]; the scope's landing page must name the free tool and the placement business [scope] and forbids copy from the retired era [scope]; git keeps the page recoverable. What it blocks: connecting Vercel, every deployed demo from M0 on, and WS13. Until Kem answers, sessions build and test locally and in CI, and no Vercel deployment exists, because deploying the repository as it stands serves the paid offer from the new project. Kem also says what happens to Typeform respondents while the page moves.
+Options: a, retire it from this repository and domain, tag archive/capital-clarity, remove the widget and dependency, re-home the offer in kem.design or a new repository, with a redirect if a URL exists; b, keep it at /capital-clarity with no link from the portal, which forces Pro; c, keep it at the root permanently and leave the portal under /app with its own landing. Recommendation: a. Why: the page sells a 175 dollar session [facts], which is commercial under Vercel's written definition [research]; the scope's landing page must name the free tool and the placement business [scope] and forbids copy from the retired era [scope]; git keeps the page recoverable. What it blocks: connecting Vercel, every deployed demo from M0 on, and WS13. No Vercel deployment exists until the page is gone, because deploying the repository as it stands serves the paid offer from the new project. Kem also says what happens to Typeform respondents while the page moves.
 
-### 2 Hosting plan. Week 1, Kem's call
+**Decided 23 Oct.** Option a. The page leaves this repository behind the tag archive/capital-clarity, and the root gets a neutral holding page until WS13 writes the pilot landing. WS13 step 1 moves into week 1 and runs once Kem says where the page lives today, where the offer goes and what happens to Typeform respondents; section 8 holds those questions.
 
-Options: Hobby at 0 a month, conditional on decision 1 being a or b-with-Pro, no payments, no ads, a placement disclosure with no link or call to action, and unpaid operation; or Pro at 20 dollars a month per seat from day one [research], [scope]. Two readings, both put to Kem. Reading one: Hobby's limits fit the pilot, enforcement is a feature pause rather than a bill, and the switch is a billing change with no code change [research]. Reading two: the staffing opt-in is a funnel to a paid placement business, and Vercel's definition is financial gain of anyone involved in producing the deployment [research], so Hobby is shaky even with the paid page gone; a pause during a pilot with real users would cost more than 20 dollars. Recommendation: this plan does not pick; the code is identical either way, except that the 300 s function ceiling and the hour-jittered daily cron on Hobby are already designed around [research]. Blocks: connecting Vercel in week 1, together with decision 1.
+### 2 Hosting plan. Week 1, Kem's call, decided 23 Oct
 
-### 3 Auth built fresh or lifted from gallery-os. Week 1, engineering default
+Options: Hobby at 0 a month, conditional on decision 1 being a or b-with-Pro, no payments, no ads, a placement disclosure with no link or call to action, and unpaid operation; or Pro at 20 dollars a month per seat from day one [research], [scope]. Two readings, both put to Kem. Reading one: Hobby's limits fit the pilot, enforcement is a feature pause rather than a bill, and the switch is a billing change with no code change [research]. Reading two: the staffing opt-in is a funnel to a paid placement business, and Vercel's definition is financial gain of anyone involved in producing the deployment [research], so Hobby is shaky even with the paid page gone; a pause during a pilot with real users would cost more than 20 dollars. Recommendation, added 23 Oct: Hobby until the first invite, then Pro before week 6. Why: with the paid page retired under decision 1, reading one holds while only Kem uses the portal. Reading two matters once real users depend on it, and a pause then costs more than the 20 dollars a month. The code is identical either way, and the 300 s function ceiling and the hour-jittered daily cron on Hobby are already designed around [research]. Blocks: connecting Vercel in week 1, together with decision 1.
+
+**Decided 23 Oct.** Hobby until the first invite, then Pro before week 6. Draft 1 offered no recommendation here; this one was added on 23 Oct when Kem accepted the week-1 recommendations, and Kem can change it with no code change.
+
+### 3 Auth built fresh or lifted from gallery-os. Week 1, engineering default, decided 23 Oct
 
 Options: build fresh from the better-auth 1.7 docs on the proof's wiring; or Kem pastes gallery-os auth.ts, schema and email code. Recommendation: build fresh. Why: gallery-os is unreachable [facts]; its better-auth version is unknown and may predate the 1.7 account index and the CLI rename [research]; its organization invitations do not close sign-up [research]; the proof's stack built and smoke-tested today with zero peer warnings [proof]. Blocks: WS1.
 
-### 4 Invite-only mechanism. Week 1, engineering default
+**Decided 23 Oct.** Build fresh on better-auth 1.7.12, from the proof's wiring.
+
+### 4 Invite-only mechanism. Week 1, engineering default, decided 23 Oct
 
 Options: a, operator-created accounts: disableSignUp plus admin createUser plus a set-your-password email carried by one small invite table with a 7-day hashed token, so the global reset token keeps its 1-hour default; b, open sign-up gated by an invite code checked in a before-hook with an invite table; c, organization-plugin invitations, which add three tables and leave sign-up open [research]. Recommendation: a. Why: Kem names every pilot user anyway; there is no public sign-up surface; the scope's "invite codes" intent is a closed pilot [scope]; b is the fallback if users should self-register. Blocks: WS1 step 6, M1.
+
+**Decided 23 Oct.** Option a: operator-created accounts with sign-up disabled and a 7-day hashed invite token.
 
 ### 5 Which postings users see. Kem's call
 
 Options: every judged posting with its verdict, proposed first and the rest under "everything judged this week"; or proposed roles only. Recommendation: every judged posting. Why: the scope says users can see every verdict and dispute it [scope], weekly volume is 32 to 52 notes [scope], and it answers the scope's open question on what else users should see without a new screen. Blocks: the postings payload's proposed flag in WS4 and /app/week in WS6.
 
-### 6 Where resumes and built PDFs live. Week 1, engineering default
+### 6 Where resumes and built PDFs live. Week 1, engineering default, decided 23 Oct
 
 Options: bytea in Postgres with the 4,194,304-byte cap and a nullable storage_key; or Vercel Blob with client-direct uploads. Recommendation: bytea with the cap. Why, on its own merits: files are a few hundred kilobytes [scope], one store to delete from [scope], no third service, and personal data stays behind the session check. The cap exists because Vercel's 4.5 MB payload limit binds both upload and download routes [research]. Blob's access model is not verified; the research could not confirm whether Blob offers private reads, so that argument is not used here. Blocks: WS2 columns, WS5 upload, WS4 PDF push.
+
+**Decided 23 Oct.** bytea in Postgres with the 4,194,304-byte cap and a nullable storage_key.
 
 ### 7 Digest classification. Engineering default
 
 Options: personalised sends through the transactional API with unsubscribe headers and a signed route; or Resend Broadcasts with Audiences. Recommendation: personalised. Why: the digest lists the user's own roles and follow-ups; Broadcasts cannot personalise per recipient [research]. Blocks: WS8.
 
-### 8 Merge and deploy policy. Week 1, Kem's call
+### 8 Merge and deploy policy. Week 1, Kem's call, decided 23 Oct
 
 Options: sessions push to main, which deploys production, until the first invite, then pull requests Kem merges; or pull requests from day one. Recommendation: pull requests from day one with Kem merging, because it also settles the commit-author question in section 8 and because the migration policy needs one schema change in flight at a time. Blocks: branch protection in WS0.
+
+**Decided 23 Oct.** Pull requests from day one. Under decision 25, Kem reviews and merges changes to the schema or the sync contract, and sessions merge the rest once CI is green. The commit-author check in section 8 now covers session merges as well as session commits.
 
 ### 9 Digest timing. Kem's call
 
 Options: a, send-now at the end of Kem's push plus a Monday 13:00 UTC cron backstop; b, only on push, so a skipped week sends nothing; c, a Sunday evening cron. Recommendation: a, with the exact backstop hour set after Kem says when the push usually finishes. Why: Hobby cron fires anywhere in the hour and may skip or double-fire [research], so the leased claim makes it safe; a skip notice and a roles digest have separate keys, so a late push still announces its roles; sending at push time gives Sunday-night mail when Kem is on time; the cron guarantees the skip-week message; Sunday 14:00 UTC, as one candidate plan proposed, is before an ordinary push. Blocks: WS8.
 
-### 10 Where profiles live. Week 1, Kem's call
+### 10 Where profiles live. Week 1, Kem's call, decided 23 Oct
 
 Options: files in the engine repository mirrored by the profiles push; or records edited in a portal form and exported to the engine. The scope lists this as Kem's [scope]. Recommendation: files mirrored. Why: the add-a-profile procedure is run from the Mac with dry sweeps and tests [scope]; the portal only needs display and form lists. Blocks: the profile table and the profiles endpoint.
+
+**Decided 23 Oct.** Files in the engine repository, mirrored to the portal by the profiles push.
 
 ### 11 Isolation level for the staffing opt-in. Kem's call, with counsel
 
 Options: a, separate Postgres schema plus a separate Drizzle module, an import lint rule and a placement-only page; b, a plus a dedicated Postgres role with USAGE only on the placement schema and a second connection string; c, a separate Neon project. Recommendation: a now, b when anyone other than Kem reads the list. Why: the scope's requirement is that the job-search side never reads it [scope]; a makes that a build-time property with one database to delete from. The dual-role fact goes with it: Kem is both the operator, who reads every overlay and verdict, and today's placement reader. The schema guards the code, not the person, so the consent and landing copy must not claim separation until someone other than Kem reads the list; that wording is part of scope decision 9 for counsel. Separately, users whose only profile is V4 are withheld from the list until the Eval Ops ruling, scope decision 1. Blocks: WS2 and WS5's consent screen in week 1 only in the sense that a is the default.
 
-### 12 Is Kem's operator account also user zero. Week 1, Kem's call
+### 12 Is Kem's operator account also user zero. Week 1, Kem's call, decided 23 Oct
 
 Options: one account with role operator and a participant row; or a separate user-zero account on a second email. Recommendation: one account, with the second email still used to test the invite path. Why: simplest end-to-end test of the operator's loop; the admin plugin allows it. This also takes scope decision 6 as yes, Kem as user zero of V3 and V4; M2 and M3 are built around that. Blocks: WS1 bootstrap, WS5 testing.
+
+**Decided 23 Oct.** One account with the operator role and a participant row, plus a second address for testing invites. Scope decision 6 is therefore yes: Kem is user zero of V3 and V4.
 
 ### 13 What deletion leaves behind. Kem's call
 
 Options: hard delete plus deletion_log with the email hash, timestamps and counts only; hard delete with nothing kept; anonymise and keep rows. Recommendation: the first. Why: meets "deletion reaches the database" [scope] literally, keeps aggregate metrics honest, and the hash stops an accidental re-invite. Blocks: WS9.
 
-### 14 Preview deployments and personal data. Week 1, engineering default
+### 14 Preview deployments and personal data. Week 1, engineering default, decided 23 Oct
 
 Options: one fixed staging Neon branch seeded with fixtures, never forked from production; or per-branch Neon forks of production for every preview. Recommendation: the fixed branch. Why: Free allows 10 branches with no extras [research], and forks copy every user's employment record. Blocks: the Neon and Vercel setup.
 
-### 15 Email verification semantics. Week 1, engineering default
+**Decided 23 Oct.** One fixed staging branch seeded with fixtures, never forked from production.
+
+### 15 Email verification semantics. Week 1, engineering default, decided 23 Oct
 
 Options: accept the set-password link as verification, creating users with emailVerified true; or also require a separate verification click before first sign-in. Recommendation: accept the link. Why: the link proves possession of the mailbox; a second click adds a step and a second email against the shared daily quota [research]. This is a reinterpretation of the scope's "with verification" [scope], stated here so Kem can object. Blocks: WS1 config.
+
+**Decided 23 Oct.** The invite link counts as email verification.
 
 ### 16 Form 3 pre-fill from the resume. Kem's call
 
@@ -689,9 +711,11 @@ The consent table carries revoked_at, but the scope does not say what revocation
 
 The scope defines precision as the on-profile share of proposed roles by user label and accepts a profile at 80 percent [scope]. Users never give an on-profile label in the scope's forms. Options: a, a proxy: one minus wrong_field passes over decided proposals, with seniority codes reported separately because the scope maps them to the person's ceiling words, not the profile [scope]; b, a one-tap on-profile yes or no on every decision. Recommendation: a for the pilot, stated in docs/pilot-review.md, with the code-to-facet mapping from the scope's feedback schema written into contracts/reason-codes.json. Why: b adds a tap to every decision. Blocks: WS10, week 6.
 
-### 25 Kem's time budget. Week 1, Kem's call
+### 25 Kem's time budget. Week 1, Kem's call, decided 23 Oct
 
 Section 7's table puts Kem's work in weeks 1 to 7 at 78 to 97 hours against the scope's 65 to 85 [scope]. Options: a, sessions merge non-schema pull requests once CI is green, and Kem reviews only schema and contract changes, saving about 10 hours; b, draft V1 and V2 after M4, saving about half of phase 0; c, move M4 one or two weeks. Recommendation: a and b, with c only if engine phase 1 slips. Blocks: decision 8's review rule and the M4 date.
+
+**Decided 23 Oct.** Levers a and b. Sessions merge pull requests that change neither the schema nor the contract once CI is green, and V1 and V2 are drafted after M4, so M4 invites V3 and V4 users only. Lever c, moving M4, is kept for an engine slip. The estimate falls to about 65 to 82 hours [plan].
 
 ## 10 Assumptions this plan makes without asking
 
@@ -756,6 +780,6 @@ Section 7's table puts Kem's work in weeks 1 to 7 at 78 to 97 hours against the 
 9. Write the contract skeleton: src/lib/contracts for events, posting-export, profile-mirror and overlay with the section 5.7 fields; contracts:json; docs/sync-contract.md from section 4; engine/sync.py with ping, the pull commands and the retry policy; engine/tests with a first test.
 10. Write .github/workflows/ci.yml: install frozen, lint, typecheck, test, drizzle-kit check, the migration-committed guard, next build with dummy auth values, and a Python 3.9 job that byte-compiles engine/sync.py and runs engine/tests. If the push of the workflow file is refused, leave it for Kem to commit and say so.
 11. Write CLAUDE.md with the rules: relative imports inside the auth config chain; auth-schema.ts is CLI-owned and regenerated with pnpm dlx auth@1.7.12 generate; scripts run through tsx; the batch helper is the only multi-table write path and db.transaction is forbidden; bytes never in list or relational selects; the 4 MB cap; file uploads and sync bodies live under /api outside the proxy matcher, and server actions stay at the 1 MB default; additive-only migrations and one schema pull request at a time; pinned versions and the Drizzle docs warning; no impersonation; no state change on a GET from an email link; no database call in a public route; fixtures are synthetic.
-12. Write docs/setup.md from sections 3.3 and 8, docs/decisions.md with the section 9 defaults marked as defaults, and replace README.md.
+12. Write docs/setup.md from sections 3.3 and 8, docs/decisions.md kept current as decisions land, and replace README.md.
 13. Silence the postcss lint warning. Run pnpm lint, pnpm typecheck, pnpm test and pnpm build. All green.
 14. Commit with a message that names the proof patch as the source of the wiring, push the branch, and open a pull request with the M0 exit criteria as its checklist. If Vercel is connected, record in docs/verification.md whether it built the session-authored commit.
